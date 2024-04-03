@@ -1,12 +1,14 @@
 from django.contrib import admin
-from .models import Product, Shop, ProductImage, Category
 from django.utils.translation import gettext_lazy as _
 from rangefilter.filters import BaseRangeFilter
+
+from .models import Category, Product, ProductImage, Shop
+
 
 class ShopAdmin(admin.ModelAdmin):
     list_display = ("title", "description", "image_tag")
     search_fields = ("title",)
-    readonly_fields = ("image_tag", )
+    readonly_fields = ("image_tag",)
 
     def image_tag(self, obj):
         if obj.image:
@@ -14,10 +16,11 @@ class ShopAdmin(admin.ModelAdmin):
         else:
             return "No image uploaded"
 
-    image_tag.short_description = _('Shop Logo')
+    image_tag.short_description = _("Shop Logo")
 
     def has_delete_permission(self, request, obj=None):
         return False
+
 
 admin.site.register(Shop, ShopAdmin)
 
@@ -29,11 +32,24 @@ class ProductImageInline(admin.TabularInline):
 
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImage]
-    list_display = ("title", "shop", "price", "num_orders", "is_active", "get_main_image")
-    search_fields = ("title", "shop__title", )
+    list_display = (
+        "title",
+        "shop",
+        "price",
+        "num_orders",
+        "is_active",
+        "get_main_image",
+    )
+    search_fields = (
+        "title",
+        "shop__title",
+    )
     ordering = ("-num_orders", "price")
-    list_filter = ('is_active', ('price', BaseRangeFilter),)
-    
+    list_filter = (
+        "is_active",
+        ("price", BaseRangeFilter),
+    )
+
     def get_main_image(self, obj):
         try:
             main_image = obj.images.get(is_main=True)
